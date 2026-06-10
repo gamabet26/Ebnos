@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Iglesia Ebenezer · Bonos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy:#0A1F5C; --navy-light:#1A3280; --gold:#C9A227; --gold-light:#F0C842;
+    --cream:#F9F7F0; --white:#ffffff; --danger:#c0392b; --success:#1a7a4a;
+    --text:#1a1a2e; --muted:#6b7280; --shadow:0 4px 24px rgba(10,31,92,0.13); --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+  #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,var(--navy) 0%,var(--navy-light) 60%,#243b8a 100%);padding:24px;}
+  .login-card{background:var(--white);border-radius:24px;padding:48px 40px 40px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.35);text-align:center;}
+  .login-logo{font-family:'Cinzel',serif;color:var(--navy);font-size:2rem;font-weight:900;line-height:1;}
+  .login-logo span{color:var(--gold);display:block;font-size:1rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;margin-top:4px;}
+  .login-divider{width:60px;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:2px;margin:18px auto;}
+  .login-subtitle{color:var(--muted);font-size:.9rem;margin-bottom:32px;}
+  .input-group{text-align:left;margin-bottom:16px;}
+  .input-group label{font-size:.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;}
+  .input-group input{width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-family:'Nunito',sans-serif;font-size:1rem;transition:border-color .2s;}
+  .input-group input:focus{outline:none;border-color:var(--gold);}
+  .btn-login{width:100%;padding:14px;margin-top:8px;background:linear-gradient(135deg,var(--navy),var(--navy-light));color:var(--white);font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;border:none;border-radius:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:transform .15s,box-shadow .15s;}
+  .btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(10,31,92,0.3);}
+  .login-error{color:var(--danger);font-size:.85rem;margin-top:10px;min-height:20px;}
+  #app{display:none;flex-direction:column;min-height:100vh;}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy-light));color:var(--white);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;box-shadow:0 2px 12px rgba(0,0,0,0.25);position:sticky;top:0;z-index:100;}
+  .header-brand{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:900;}
+  .header-brand span{color:var(--gold-light);}
+  .header-right{display:flex;align-items:center;gap:12px;}
+  .header-user{font-size:.85rem;opacity:.85;}
+  .btn-logout{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:var(--white);padding:6px 14px;border-radius:20px;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:background .2s;}
+  .btn-logout:hover{background:rgba(255,255,255,0.25);}
+  main{flex:1;padding:28px 24px;max-width:1100px;margin:0 auto;width:100%;}
+  .view{display:none;} .view.active{display:block;}
+  .member-hero{background:linear-gradient(135deg,var(--navy) 0%,#1e3a8a 100%);border-radius:var(--radius);padding:36px 28px;color:var(--white);text-align:center;margin-bottom:24px;position:relative;overflow:hidden;}
+  .member-hero::before{content:'✦';position:absolute;top:-20px;right:-20px;font-size:120px;opacity:.04;color:var(--gold);}
+  .member-name{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;margin-bottom:4px;}
+  .member-category{display:inline-block;background:rgba(201,162,39,0.25);border:1px solid var(--gold);color:var(--gold-light);border-radius:20px;padding:4px 14px;font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:28px;}
+  .member-total-label{font-size:.8rem;opacity:.7;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+  .member-total-pts{font-family:'Cinzel',serif;font-size:4rem;font-weight:900;color:var(--gold-light);line-height:1;}
+  .member-total-sub{font-size:.85rem;opacity:.6;margin-top:4px;}
+  .trimestres-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+  @media(max-width:500px){.trimestres-grid{grid-template-columns:1fr;}}
+  .trimestre-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border-top:4px solid var(--gold);}
+  .trimestre-title{font-family:'Cinzel',serif;font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:4px;}
+  .trimestre-period{font-size:.75rem;color:var(--muted);margin-bottom:16px;}
+  .trimestre-pts{font-size:2.2rem;font-weight:900;color:var(--gold);font-family:'Cinzel',serif;}
+  .trimestre-pts span{font-size:.8rem;color:var(--muted);font-weight:600;font-family:'Nunito',sans-serif;}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .badge{display:flex;align-items:center;gap:4px;background:var(--cream);border-radius:20px;padding:4px 10px;font-size:.75rem;font-weight:700;color:var(--navy);}
+  .badge.puntualidad{border-left:3px solid var(--gold);}
+  .badge.asistencia{border-left:3px solid #3b82f6;}
+  .history-section{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+  .section-title{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent);}
+  .history-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:.9rem;}
+  .history-item:last-child{border-bottom:none;}
+  .history-date{color:var(--muted);font-size:.78rem;}
+  .history-type{font-weight:700;}
+  .history-pts{font-weight:800;color:var(--success);}
+  .history-pts.negative{color:var(--danger);}
+  .empty-state{text-align:center;color:var(--muted);padding:32px;font-size:.9rem;}
+  .admin-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+  .tab-btn{padding:10px 20px;border-radius:10px;border:2px solid var(--navy);background:transparent;color:var(--navy);font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;}
+  .tab-btn.active,.tab-btn:hover{background:var(--navy);color:var(--white);}
+  .admin-tab{display:none;} .admin-tab.active{display:block;}
+  .card{background:var(--white);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:20px;}
+  .card-title{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:18px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  @media(max-width:600px){.form-row{grid-template-columns:1fr;}}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  .form-group label{font-size:.78rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.8px;}
+  .form-group input,.form-group select{padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.95rem;transition:border-color .2s;}
+  .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--gold);}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;}
+  .btn-primary{background:linear-gradient(135deg,var(--navy),var(--navy-light));color:var(--white);}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(10,31,92,0.25);}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);}
+  .btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(201,162,39,0.35);}
+  .btn-danger{background:#fee2e2;color:var(--danger);}
+  .btn-danger:hover{background:var(--danger);color:var(--white);}
+  .btn-sm{padding:6px 12px;font-size:.78rem;}
+  .users-table{width:100%;border-collapse:collapse;font-size:.9rem;}
+  .users-table th{text-align:left;font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:8px 12px;border-bottom:2px solid #f3f4f6;}
+  .users-table td{padding:12px;border-bottom:1px solid #f3f4f6;vertical-align:middle;}
+  .users-table tr:last-child td{border-bottom:none;}
+  .users-table tr:hover td{background:#fafafa;}
+  .user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy-light));color:var(--white);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;}
+  .pill-ninos{background:#fef3c7;color:#92400e;} .pill-adultos{background:#dbeafe;color:#1e40af;}
+  .pts-display{font-family:'Cinzel',serif;font-weight:900;font-size:1.1rem;color:var(--gold);}
+  .bonus-form{background:#f8faff;border:2px dashed var(--navy-light);border-radius:12px;padding:20px;}
+  .bonus-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;}
+  @media(max-width:700px){.bonus-row{grid-template-columns:1fr 1fr;}}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
+  .stat-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);text-align:center;border-top:4px solid var(--gold);}
+  .stat-num{font-family:'Cinzel',serif;font-size:2.2rem;font-weight:900;color:var(--navy);}
+  .stat-label{font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;}
+  .alert{padding:12px 16px;border-radius:8px;font-size:.88rem;font-weight:600;margin-bottom:16px;}
+  .alert-success{background:#f0fdf4;color:var(--success);border:1px solid #86efac;}
+  .alert-error{background:#fef2f2;color:var(--danger);border:1px solid #fca5a5;}
+  .search-bar{position:relative;margin-bottom:16px;}
+  .search-bar input{width:100%;padding:10px 16px 10px 40px;border:2px solid #e5e7eb;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.95rem;}
+  .search-bar input:focus{outline:none;border-color:var(--gold);}
+  .search-bar::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.9rem;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--white);border-radius:var(--radius);padding:28px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+  .modal-title{font-family:'Cinzel',serif;font-weight:700;color:var(--navy);font-size:1.1rem;margin-bottom:20px;}
+  .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+  .ranking-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f3f4f6;}
+  .rank-num{font-family:'Cinzel',serif;font-weight:900;font-size:1.2rem;color:var(--gold);width:28px;}
+  .rank-num.top{color:#e5ae0e;}
+  .rank-info{flex:1;}
+  .rank-name{font-weight:700;}
+  .rank-cat{font-size:.75rem;color:var(--muted);}
+  .rank-pts{font-family:'Cinzel',serif;font-weight:900;font-size:1.3rem;color:var(--navy);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">EBENEZER<span>Sistema de Bonos</span></div>
+    <div class="login-divider"></div>
+    <p class="login-subtitle">Ingresa con tu usuario y contraseña</p>
+    <div class="input-group">
+      <label>Usuario</label>
+      <input type="text" id="login-user" placeholder="ej. juan.lopez" autocomplete="username"/>
+    </div>
+    <div class="input-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn-login" id="btn-login">Ingresar</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-brand">✦ <span>EBENEZER</span> · Bonos</div>
+    <div class="header-right">
+      <span class="header-user" id="header-user"></span>
+      <button class="btn-logout" id="btn-logout">Salir</button>
+    </div>
+  </header>
+  <main>
+    <!-- MEMBER VIEW -->
+    <div id="view-member" class="view">
+      <div class="member-hero">
+        <div class="member-name" id="m-name">—</div>
+        <div class="member-category" id="m-cat">—</div>
+        <div class="member-total-label">Bonos acumulados totales</div>
+        <div class="member-total-pts" id="m-total">0</div>
+        <div class="member-total-sub">puntos</div>
+      </div>
+      <div class="trimestres-grid">
+        <div class="trimestre-card">
+          <div class="trimestre-title">🌞 Trimestre 1</div>
+          <div class="trimestre-period">Junio · Julio · Agosto</div>
+          <div class="trimestre-pts" id="m-t1">0 <span>pts</span></div>
+          <div class="badge-row" id="m-badges-t1"></div>
+        </div>
+        <div class="trimestre-card">
+          <div class="trimestre-title">🍂 Trimestre 2</div>
+          <div class="trimestre-period">Septiembre · Octubre · Noviembre</div>
+          <div class="trimestre-pts" id="m-t2">0 <span>pts</span></div>
+          <div class="badge-row" id="m-badges-t2"></div>
+        </div>
+      </div>
+      <div class="history-section">
+        <div class="section-title">Historial de movimientos</div>
+        <div id="m-history"></div>
+      </div>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="view-admin" class="view">
+      <div class="admin-tabs">
+        <button class="tab-btn active" data-tab="resumen">📊 Resumen</button>
+        <button class="tab-btn" data-tab="usuarios">👥 Miembros</button>
+        <button class="tab-btn" data-tab="bonos">🎁 Asignar Bonos</button>
+        <button class="tab-btn" data-tab="ranking">🏆 Ranking</button>
+      </div>
+      <!-- Resumen -->
+      <div id="tab-resumen" class="admin-tab active">
+        <div class="stats-grid" id="stats-grid"></div>
+        <div class="card"><div class="card-title">🕐 Últimos movimientos</div><div id="recent-moves"></div></div>
+      </div>
+      <!-- Usuarios -->
+      <div id="tab-usuarios" class="admin-tab">
+        <div class="card">
+          <div class="card-title">➕ Crear nuevo miembro</div>
+          <div class="form-row">
+            <div class="form-group"><label>Nombre completo</label><input type="text" id="new-name" placeholder="ej. Ana García"/></div>
+            <div class="form-group"><label>Usuario (login)</label><input type="text" id="new-username" placeholder="ej. ana.garcia"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Contraseña</label><input type="password" id="new-pass" placeholder="mínimo 6 caracteres"/></div>
+            <div class="form-group"><label>Categoría</label>
+              <select id="new-category"><option value="adultos">Adultos</option><option value="ninos">Niños</option></select>
+            </div>
+          </div>
+          <div id="user-create-alert"></div>
+          <button class="btn btn-primary" id="btn-create-user">✦ Registrar miembro</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Lista de miembros</div>
+          <div class="search-bar"><input type="text" id="search-users" placeholder="Buscar miembro..."/></div>
+          <div style="overflow-x:auto">
+            <table class="users-table">
+              <thead><tr><th>Miembro</th><th>Usuario</th><th>Categoría</th><th>T1 Jun–Ago</th><th>T2 Sep–Nov</th><th>Total</th><th>Acciones</th></tr></thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Bonos -->
+      <div id="tab-bonos" class="admin-tab">
+        <div class="card">
+          <div class="card-title">🎁 Asignar bonos a miembro</div>
+          <div class="bonus-form">
+            <div class="bonus-row">
+              <div class="form-group"><label>Miembro</label><select id="bonus-user-select"></select></div>
+              <div class="form-group"><label>Tipo</label>
+                <select id="bonus-type">
+                  <option value="puntualidad">Puntualidad</option>
+                  <option value="asistencia">Asistencia</option>
+                  <option value="especial">Especial</option>
+                  <option value="canje">Canje (−)</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Trimestre</label>
+                <select id="bonus-trimestre"><option value="t1">T1 · Jun–Ago</option><option value="t2">T2 · Sep–Nov</option></select>
+              </div>
+              <div class="form-group"><label>Puntos</label><input type="number" id="bonus-pts" value="1" min="1" max="99"/></div>
+              <button class="btn btn-gold" id="btn-assign-bonus">Sumar</button>
+            </div>
+            <div class="form-group" style="margin-top:12px">
+              <label>Nota / razón</label>
+              <input type="text" id="bonus-note" placeholder="ej. Clase del 8 de junio"/>
+            </div>
+          </div>
+          <div id="bonus-alert" style="margin-top:12px"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📋 Historial completo de bonos</div>
+          <div class="search-bar"><input type="text" id="search-history" placeholder="Buscar en historial..."/></div>
+          <div id="full-history"></div>
+        </div>
+      </div>
+      <!-- Ranking -->
+      <div id="tab-ranking" class="admin-tab">
+        <div class="card"><div class="card-title">🏆 Ranking — Niños (para regalos de Navidad)</div><div id="ranking-ninos"></div></div>
+        <div class="card"><div class="card-title">📊 Ranking — Adultos</div><div id="ranking-adultos"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal eliminar -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal">
+    <div class="modal-title">⚠️ Eliminar miembro</div>
+    <p style="font-size:.9rem;color:var(--muted)">¿Seguro que deseas eliminar a <strong id="modal-delete-name"></strong>? Se perderán todos sus bonos.</p>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="btn-confirm-delete">Eliminar</button>
+      <button class="btn btn-primary" id="btn-cancel-delete">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-title">✏️ Editar puntos de <span id="modal-edit-name"></span></div>
+    <div class="form-row">
+      <div class="form-group"><label>T1 (Jun–Ago)</label><input type="number" id="edit-t1" min="0"/></div>
+      <div class="form-group"><label>T2 (Sep–Nov)</label><input type="number" id="edit-t2" min="0"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gold" id="btn-save-edit">Guardar</button>
+      <button class="btn btn-primary" id="btn-cancel-edit">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }        from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getDatabase, ref, set, get, push, onValue, remove, update }
+                                from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+// ── CONFIGURA TU FIREBASE AQUÍ ──
+const firebaseConfig = {
+  apiKey: "REEMPLAZA_API_KEY",
+  authDomain: "REEMPLAZA.firebaseapp.com",
+  databaseURL: "https://REEMPLAZA-default-rtdb.firebaseio.com",
+  projectId: "REEMPLAZA",
+  storageBucket: "REEMPLAZA.appspot.com",
+  messagingSenderId: "REEMPLAZA",
+  appId: "REEMPLAZA"
+};
+// ───────────────────────────────
+
+const fbApp = initializeApp(firebaseConfig);
+const db    = getDatabase(fbApp);
+
+const ADMIN = { username:"admin", password:"ebenezer2024", name:"Administrador", role:"admin" };
+
+let currentUser    = null;
+let allUsers       = {};
+let allHistory     = {};
+let deleteTargetId = null;
+let editTargetId   = null;
+
+// ── HELPERS ────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const typeLabel = t => ({puntualidad:"⏰ Puntualidad",asistencia:"✅ Asistencia",especial:"⭐ Especial",canje:"🎁 Canje"}[t]||t);
+const trimLabel = t => t==="t1"?"🌞 T1 Jun–Ago":"🍂 T2 Sep–Nov";
+const fmtDate   = ts => new Date(ts).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"2-digit"});
+function showAlert(elId, msg, type){
+  const el=$( elId);
+  el.innerHTML=`<div class="alert alert-${type==="success"?"success":"error"}">${msg}</div>`;
+  setTimeout(()=>el.innerHTML="",4000);
+}
+function closeModal(){
+  document.querySelectorAll(".modal-overlay").forEach(m=>m.classList.remove("open"));
+  deleteTargetId=null; editTargetId=null;
+}
+function showView(v){
+  document.querySelectorAll(".view").forEach(e=>e.classList.remove("active"));
+  $("view-"+v).classList.add("active");
+}
+
+// ── LOGIN ──────────────────────────────────────────────────
+async function doLogin(){
+  const u=$("login-user").value.trim().toLowerCase();
+  const p=$("login-pass").value;
+  $("login-error").textContent="";
+  if(!u||!p){$("login-error").textContent="Completa usuario y contraseña.";return;}
+  if(u===ADMIN.username&&p===ADMIN.password){currentUser={...ADMIN};startApp();return;}
+  try{
+    const snap=await get(ref(db,"users"));
+    if(snap.exists()){
+      for(const [id,usr] of Object.entries(snap.val())){
+        if(usr.username===u&&usr.password===p){currentUser={id,...usr};startApp();return;}
+      }
+    }
+    $("login-error").textContent="Usuario o contraseña incorrectos.";
+  }catch(e){$("login-error").textContent="Error de conexión.";console.error(e);}
+}
+
+function startApp(){
+  $("login-screen").style.display="none";
+  $("app").style.display="flex";
+  $("header-user").textContent=(currentUser.role==="admin"?"👑 ":"👤 ")+currentUser.name;
+  if(currentUser.role==="admin"){showView("admin");listenData();}
+  else{showView("member");listenMemberData();}
+}
+
+function doLogout(){
+  currentUser=null;
+  $("app").style.display="none";
+  $("login-screen").style.display="flex";
+  $("login-user").value=""; $("login-pass").value="";
+}
+
+// ── MEMBER ─────────────────────────────────────────────────
+function listenMemberData(){
+  onValue(ref(db,`users/${currentUser.id}`),snap=>{
+    if(!snap.exists())return;
+    const u=snap.val();
+    $("m-name").textContent=u.name;
+    $("m-cat").textContent=u.category==="ninos"?"🧒 Niños":"🙋 Adultos";
+    const t1=u.t1||0,t2=u.t2||0;
+    $("m-t1").innerHTML=`${t1} <span>pts</span>`;
+    $("m-t2").innerHTML=`${t2} <span>pts</span>`;
+    $("m-total").textContent=t1+t2;
+    ["t1","t2"].forEach(t=>{
+      const p=u[`${t}_puntualidad`]||0, a=u[`${t}_asistencia`]||0;
+      $(`m-badges-${t}`).innerHTML=
+        (p>0?`<div class="badge puntualidad">⏰ Puntualidad ×${p}</div>`:"")+
+        (a>0?`<div class="badge asistencia">✅ Asistencia ×${a}</div>`:"");
+    });
+  });
+  onValue(ref(db,"history"),snap=>{
+    const hist=snap.val()||{};
+    const moves=Object.values(hist).filter(h=>h.userId===currentUser.id).sort((a,b)=>b.ts-a.ts);
+    const el=$("m-history");
+    if(!moves.length){el.innerHTML='<div class="empty-state">Sin movimientos aún.</div>';return;}
+    el.innerHTML=moves.slice(0,30).map(h=>`
+      <div class="history-item">
+        <div>
+          <div class="history-type">${typeLabel(h.type)}${h.note?' · <span style="font-weight:400;color:var(--muted)">'+h.note+'</span>':''}</div>
+          <div class="history-date">${trimLabel(h.trimestre)} · ${fmtDate(h.ts)}</div>
+        </div>
+        <div class="history-pts ${h.pts<0?'negative':''}">${h.pts>0?'+':''}${h.pts} pts</div>
+      </div>`).join("");
+  });
+}
+
+// ── ADMIN DATA ─────────────────────────────────────────────
+function listenData(){
+  onValue(ref(db,"users"), snap=>{allUsers=snap.val()||{};renderAll();});
+  onValue(ref(db,"history"),snap=>{allHistory=snap.val()||{};renderAll();});
+}
+
+function renderAll(){
+  renderStats(); renderUsersTable(); renderBonusSelect();
+  renderHistoryTable(); renderRanking(); renderRecentMoves();
+}
+
+function renderStats(){
+  const u=Object.values(allUsers);
+  $("stats-grid").innerHTML=[
+    [u.length,"Total Miembros"],
+    [u.filter(x=>x.category==="ninos").length,"Niños"],
+    [u.filter(x=>x.category==="adultos").length,"Adultos"],
+    [u.reduce((s,x)=>s+(x.t1||0)+(x.t2||0),0),"Bonos entregados"],
+    [Object.keys(allHistory).length,"Movimientos"]
+  ].map(([n,l])=>`<div class="stat-card"><div class="stat-num">${n}</div><div class="stat-label">${l}</div></div>`).join("");
+}
+
+function renderUsersTable(){
+  const q=($("search-users")?.value||"").toLowerCase();
+  const tbody=$("users-tbody");
+  const entries=Object.entries(allUsers).filter(([,u])=>
+    u.name.toLowerCase().includes(q)||u.username.toLowerCase().includes(q));
+  if(!entries.length){tbody.innerHTML='<tr><td colspan="7" class="empty-state">Sin miembros.</td></tr>';return;}
+  tbody.innerHTML=entries.map(([id,u])=>{
+    const t1=u.t1||0,t2=u.t2||0;
+    return `<tr>
+      <td style="display:flex;align-items:center;gap:10px">
+        <div class="user-avatar">${u.name.charAt(0).toUpperCase()}</div>
+        <span style="font-weight:700">${u.name}</span>
+      </td>
+      <td style="color:var(--muted);font-size:.85rem">${u.username}</td>
+      <td><span class="pill pill-${u.category}">${u.category==="ninos"?"Niños":"Adultos"}</span></td>
+      <td><span class="pts-display">${t1}</span></td>
+      <td><span class="pts-display">${t2}</span></td>
+      <td><span class="pts-display" style="color:var(--navy)">${t1+t2}</span></td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-gold" data-action="edit" data-id="${id}">✏️</button>
+        <button class="btn btn-sm btn-danger" data-action="delete" data-id="${id}">🗑</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function renderBonusSelect(){
+  const sel=$("bonus-user-select");
+  if(!sel)return;
+  const prev=sel.value;
+  sel.innerHTML=Object.entries(allUsers).map(([id,u])=>
+    `<option value="${id}">${u.name} (${u.category==="ninos"?"Niños":"Adultos"})</option>`).join("");
+  if(prev)sel.value=prev;
+}
+
+async function assignBonus(){
+  const userId=$("bonus-user-select").value;
+  const type=$("bonus-type").value;
+  const tri=$("bonus-trimestre").value;
+  const pts=parseInt($("bonus-pts").value)||1;
+  const note=$("bonus-note").value.trim();
+  if(!userId){showAlert("bonus-alert","Selecciona un miembro.","error");return;}
+  const realPts=type==="canje"?-pts:pts;
+  const u=allUsers[userId];
+  const updates={};
+  updates[`users/${userId}/${tri}`]=Math.max(0,(u[tri]||0)+realPts);
+  if(type==="puntualidad"||type==="asistencia"){
+    const key=`${tri}_${type}`;
+    updates[`users/${userId}/${key}`]=(u[key]||0)+(realPts>0?1:0);
+  }
+  const hk=push(ref(db,"history")).key;
+  updates[`history/${hk}`]={userId,userName:u.name,type,trimestre:tri,pts:realPts,note,ts:Date.now(),by:"admin"};
+  try{
+    await update(ref(db),updates);
+    showAlert("bonus-alert",`✅ ${realPts>0?"+":""}${realPts} pts a ${u.name}.`,"success");
+    $("bonus-pts").value="1"; $("bonus-note").value="";
+  }catch(e){showAlert("bonus-alert","Error al guardar.","error");}
+}
+
+function renderHistoryTable(){
+  const q=($("search-history")?.value||"").toLowerCase();
+  const el=$("full-history");
+  const moves=Object.values(allHistory)
+    .filter(h=>h.userName?.toLowerCase().includes(q)||h.note?.toLowerCase().includes(q))
+    .sort((a,b)=>b.ts-a.ts);
+  if(!moves.length){el.innerHTML='<div class="empty-state">Sin historial.</div>';return;}
+  el.innerHTML=moves.slice(0,50).map(h=>`
+    <div class="history-item">
+      <div>
+        <div style="font-weight:700">${h.userName} · ${typeLabel(h.type)}</div>
+        <div style="font-size:.78rem;color:var(--muted)">${trimLabel(h.trimestre)} · ${fmtDate(h.ts)}${h.note?' · '+h.note:''}</div>
+      </div>
+      <div class="history-pts ${h.pts<0?'negative':''}">${h.pts>0?'+':''}${h.pts}</div>
+    </div>`).join("");
+}
+
+function renderRecentMoves(){
+  const el=$("recent-moves");
+  if(!el)return;
+  const moves=Object.values(allHistory).sort((a,b)=>b.ts-a.ts).slice(0,8);
+  if(!moves.length){el.innerHTML='<div class="empty-state">Sin movimientos.</div>';return;}
+  el.innerHTML=moves.map(h=>`
+    <div class="history-item">
+      <div>
+        <span style="font-weight:700">${h.userName}</span>
+        <span style="color:var(--muted);font-size:.85rem"> · ${typeLabel(h.type)} · ${trimLabel(h.trimestre)}</span>
+        ${h.note?`<span style="color:var(--muted);font-size:.8rem"> — ${h.note}</span>`:""}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="history-pts ${h.pts<0?'negative':''}">${h.pts>0?'+':''}${h.pts}</span>
+        <span style="font-size:.75rem;color:var(--muted)">${fmtDate(h.ts)}</span>
+      </div>
+    </div>`).join("");
+}
+
+function renderRanking(){
+  const u=Object.entries(allUsers);
+  const mk=(cat)=>u.filter(([,x])=>x.category===cat)
+    .map(([,x])=>({name:x.name,pts:(x.t1||0)+(x.t2||0),t1:x.t1||0,t2:x.t2||0}))
+    .sort((a,b)=>b.pts-a.pts);
+  const html=arr=>arr.length?arr.map((x,i)=>`
+    <div class="ranking-row">
+      <div class="rank-num ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div>
+      <div class="rank-info"><div class="rank-name">${x.name}</div><div class="rank-cat">T1: ${x.t1} · T2: ${x.t2}</div></div>
+      <div class="rank-pts">${x.pts} pts</div>
+    </div>`).join(""):'<div class="empty-state">Sin miembros en esta categoría.</div>';
+  $("ranking-ninos").innerHTML=html(mk("ninos"));
+  $("ranking-adultos").innerHTML=html(mk("adultos"));
+}
+
+async function createUser(){
+  const name=$("new-name").value.trim();
+  const username=$("new-username").value.trim().toLowerCase();
+  const pass=$("new-pass").value;
+  const category=$("new-category").value;
+  if(!name||!username||!pass){showAlert("user-create-alert","Todos los campos son obligatorios.","error");return;}
+  if(pass.length<6){showAlert("user-create-alert","Contraseña mínimo 6 caracteres.","error");return;}
+  if(username===ADMIN.username){showAlert("user-create-alert","Usuario reservado.","error");return;}
+  if(Object.values(allUsers).some(u=>u.username===username)){showAlert("user-create-alert","Ese usuario ya existe.","error");return;}
+  try{
+    const nr=push(ref(db,"users"));
+    await set(nr,{name,username,password:pass,category,t1:0,t2:0,createdAt:Date.now()});
+    showAlert("user-create-alert",`✅ Miembro "${name}" creado.`,"success");
+    $("new-name").value=""; $("new-username").value=""; $("new-pass").value="";
+  }catch(e){showAlert("user-create-alert","Error al crear: "+e.message,"error");console.error(e);}
+}
+
+// ── EVENT LISTENERS (todo aquí, sin onclick en HTML) ───────
+document.addEventListener("DOMContentLoaded",()=>{
+
+  // Login
+  $("btn-login").addEventListener("click",doLogin);
+  $("login-pass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+  $("login-user").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+  $("btn-logout").addEventListener("click",doLogout);
+
+  // Admin tabs
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".admin-tab").forEach(t=>t.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      $("tab-"+btn.dataset.tab).classList.add("active");
+      btn.classList.add("active");
+      if(btn.dataset.tab==="bonos")renderBonusSelect();
+    });
+  });
+
+  // Crear usuario
+  $("btn-create-user").addEventListener("click",createUser);
+
+  // Búsqueda usuarios
+  $("search-users").addEventListener("input",renderUsersTable);
+  $("search-history").addEventListener("input",renderHistoryTable);
+
+  // Asignar bono
+  $("btn-assign-bonus").addEventListener("click",assignBonus);
+
+  // Delegación para botones de tabla (edit/delete)
+  $("users-tbody").addEventListener("click",e=>{
+    const btn=e.target.closest("[data-action]");
+    if(!btn)return;
+    const id=btn.dataset.id;
+    if(btn.dataset.action==="edit"){
+      editTargetId=id;
+      $("modal-edit-name").textContent=allUsers[id].name;
+      $("edit-t1").value=allUsers[id].t1||0;
+      $("edit-t2").value=allUsers[id].t2||0;
+      $("modal-edit").classList.add("open");
+    }
+    if(btn.dataset.action==="delete"){
+      deleteTargetId=id;
+      $("modal-delete-name").textContent=allUsers[id].name;
+      $("modal-delete").classList.add("open");
+    }
+  });
+
+  // Modales
+  $("btn-confirm-delete").addEventListener("click",async()=>{
+    if(!deleteTargetId)return;
+    await remove(ref(db,`users/${deleteTargetId}`));
+    const toRm=Object.entries(allHistory).filter(([,h])=>h.userId===deleteTargetId).map(([k])=>k);
+    for(const k of toRm)await remove(ref(db,`history/${k}`));
+    closeModal();
+  });
+  $("btn-cancel-delete").addEventListener("click",closeModal);
+  $("btn-save-edit").addEventListener("click",async()=>{
+    if(!editTargetId)return;
+    const t1=parseInt($("edit-t1").value)||0;
+    const t2=parseInt($("edit-t2").value)||0;
+    await update(ref(db,`users/${editTargetId}`),{t1,t2});
+    closeModal();
+  });
+  $("btn-cancel-edit").addEventListener("click",closeModal);
+
+  // Cerrar modales con click fuera
+  document.querySelectorAll(".modal-overlay").forEach(m=>{
+    m.addEventListener("click",e=>{if(e.target===m)closeModal();});
+  });
+});
+</script>
+</body>
+</html>
