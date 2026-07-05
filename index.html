@@ -391,14 +391,6 @@ main{flex:1;padding:20px 16px 90px;max-width:900px;margin:0 auto;width:100%;}
               </select>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group"><label>Trimestre</label>
-              <select id="new-trimestre">
-                <option value="t1">T1 · Jun–Ago</option>
-                <option value="t2">T2 · Sep–Nov</option>
-              </select>
-            </div>
-          </div>
           <div id="alert-crear"></div>
           <button class="btn btn-primary" id="btn-crear">✦ Registrar miembro</button>
         </div>
@@ -419,10 +411,7 @@ main{flex:1;padding:20px 16px 90px;max-width:900px;margin:0 auto;width:100%;}
                   <option value="canje">🎁 Canje (−)</option>
                 </select>
               </div>
-              <div class="form-group"><label>Trimestre</label>
-                <select id="bonus-tri"><option value="t1">T1</option><option value="t2">T2</option></select>
-              </div>
-              <div class="form-group"><label>Puntos</label><input type="number" id="bonus-pts" value="1" min="1" max="99"/></div>
+<div class="form-group"><label>Puntos</label><input type="number" id="bonus-pts" value="1" min="1" max="99"/></div>
               <button class="btn btn-gold" id="btn-bonus">+ Sumar</button>
             </div>
             <div class="form-group" style="margin-top:12px"><label>Nota</label><input type="text" id="bonus-nota" placeholder="ej. Clase 8 de junio"/></div>
@@ -437,7 +426,7 @@ main{flex:1;padding:20px 16px 90px;max-width:900px;margin:0 auto;width:100%;}
           <div class="card-title">📋 Todos los miembros</div>
           <div style="overflow-x:auto">
             <table class="users-table">
-              <thead><tr><th>Nombre</th><th>Categoría</th><th>T1</th><th>T2</th><th>Total</th><th>Acc.</th></tr></thead>
+              <thead><tr><th>Nombre</th><th>Categoría</th><th>⏰ Punt.</th><th>✅ Asist.</th><th>⭐ Esp.</th><th>Total</th><th>Acc.</th></tr></thead>
               <tbody id="admin-tabla"></tbody>
             </table>
           </div>
@@ -578,7 +567,7 @@ function renderAdultos(){
   const el=$('list-adultos');
   const list=Object.entries(allUsers)
     .filter(([,u])=>u.category==='adultos')
-    .map(([id,u])=>([id,u,(u.t1||0)+(u.t2||0)]))
+    .map(([id,u])=>([id,u,(u.puntualidad||0)+(u.asistencia||0)+(u.especial||0)]))
     .sort((a,b)=>b[2]-a[2]);
   if(!list.length){el.innerHTML='<div class="empty">Sin miembros adultos aún.</div>';return;}
   el.innerHTML=list.map(([id,u,tot],i)=>`
@@ -588,8 +577,9 @@ function renderAdultos(){
       <div class="member-info">
         <div class="member-name">${u.name}</div>
         <div class="trimestre-pills">
-          <span class="trim-pill">🌞 T1: ${u.t1||0}</span>
-          <span class="trim-pill">🍂 T2: ${u.t2||0}</span>
+          <span class="trim-pill">⏰ ${u.puntualidad||0}</span>
+          <span class="trim-pill">✅ ${u.asistencia||0}</span>
+          <span class="trim-pill">⭐ ${u.especial||0}</span>
         </div>
       </div>
       <div class="member-pts-block">
@@ -605,7 +595,7 @@ function renderNinos(){
   const emojis=['🦁','🐯','🦊','🐺','🐸','🦅','🦋','🌈','🚀','⚡'];
   const list=Object.entries(allUsers)
     .filter(([,u])=>u.category==='ninos')
-    .map(([id,u])=>([id,u,(u.t1||0)+(u.t2||0)]))
+    .map(([id,u])=>([id,u,(u.puntualidad||0)+(u.asistencia||0)+(u.especial||0)]))
     .sort((a,b)=>b[2]-a[2]);
   if(!list.length){el.innerHTML='<div class="empty">¡Aún no hay campeones registrados!</div>';return;}
   el.innerHTML=list.map(([id,u,tot],i)=>{
@@ -616,7 +606,7 @@ function renderNinos(){
       <div class="kid-avatar">${emoji}</div>
       <div class="kid-info">
         <div class="kid-name">${u.name} ${medals}</div>
-        <div class="kid-sub">🌞 T1: ${u.t1||0} pts &nbsp;·&nbsp; 🍂 T2: ${u.t2||0} pts</div>
+        <div class="kid-sub">⏰ ${u.puntualidad||0} &nbsp;·&nbsp; ✅ ${u.asistencia||0} &nbsp;·&nbsp; ⭐ ${u.especial||0}</div>
       </div>
       <div class="kid-pts-block">
         <div class="kid-pts">${tot}</div>
@@ -674,16 +664,19 @@ $('btn-crear').addEventListener('click',async()=>{
 $('btn-bonus').addEventListener('click',async()=>{
   const userId=$('bonus-sel').value;
   const tipo=$('bonus-tipo').value;
-  const tri=$('bonus-tri').value;
   const pts=parseInt($('bonus-pts').value)||1;
   const nota=$('bonus-nota').value.trim();
   if(!userId){showAlert('alert-bonus','Selecciona un miembro.','error');return;}
   const u=allUsers[userId];
   const realPts=tipo==='canje'?-pts:pts;
   const updates={};
-  updates[`users/${userId}/${tri}`]=Math.max(0,(u[tri]||0)+realPts);
+  if(tipo==='canje'){
+    updates[`users/${userId}/especial`]=Math.max(0,(u.especial||0)+realPts);
+  } else {
+    updates[`users/${userId}/${tipo}`]=Math.max(0,(u[tipo]||0)+realPts);
+  }
   const hk=push(ref(db,'history')).key;
-  updates[`history/${hk}`]={userId,userName:u.name,tipo,trimestre:tri,pts:realPts,nota,ts:Date.now()};
+  updates[`history/${hk}`]={userId,userName:u.name,tipo,pts:realPts,nota,ts:Date.now()};
   try{
     await update(ref(db),updates);
     showAlert('alert-bonus',`✅ ${realPts>0?'+':''}${realPts} pts a ${u.name}.`,'success');
