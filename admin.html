@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ebenezer · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#0A1F5C; --navy-light:#1A3280; --gold:#C9A227; --gold-light:#F0C842;
+  --teal:#2ec4b6; --cream:#F9F7F0; --white:#fff;
+  --danger:#e74c3c; --success:#1a7a4a; --muted:#6b7280;
+  --radius:14px; --shadow:0 4px 24px rgba(10,31,92,0.13);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);color:#1a1a2e;min-height:100vh;}
+
+/* LOGIN */
+#login-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0a0e2e 0%,#0d2137 40%,#0a3d2e 100%);
+  padding:24px;
+}
+.login-card{
+  background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.15);border-radius:24px;
+  padding:44px 36px;width:100%;max-width:380px;text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,0.4);
+}
+.login-icon{font-size:3rem;margin-bottom:8px;}
+.login-title{font-family:'Cinzel',serif;color:var(--gold-light);font-size:1.4rem;font-weight:900;margin-bottom:4px;}
+.login-sub{color:rgba(255,255,255,0.6);font-size:.85rem;margin-bottom:32px;}
+.field{text-align:left;margin-bottom:16px;}
+.field label{font-size:.75rem;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;}
+.field input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;}
+.field input::placeholder{color:rgba(255,255,255,0.35);}
+.field input:focus{outline:none;border-color:var(--teal);}
+.btn-ingresar{width:100%;padding:14px;margin-top:8px;background:linear-gradient(135deg,var(--teal),#0a9e93);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;border:none;border-radius:10px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;}
+.btn-ingresar:hover{opacity:.9;}
+.login-err{color:#ff6b6b;font-size:.85rem;margin-top:10px;min-height:18px;font-weight:700;}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh;}
+header{
+  background:linear-gradient(135deg,var(--navy),var(--navy-light));
+  color:#fff;padding:0 24px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+  box-shadow:0 2px 12px rgba(0,0,0,0.25);
+}
+.hbrand{font-family:'Cinzel',serif;font-size:1rem;font-weight:900;}
+.hbrand span{color:var(--gold-light);}
+.btn-out{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 16px;border-radius:20px;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;}
+
+main{flex:1;padding:24px 20px 40px;max-width:1000px;margin:0 auto;width:100%;}
+
+/* TABS */
+.tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+.tab{padding:10px 22px;border-radius:10px;border:2px solid var(--navy);background:transparent;color:var(--navy);font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;}
+.tab.active,.tab:hover{background:var(--navy);color:#fff;}
+.panel{display:none;} .panel.active{display:block;}
+
+/* CARDS */
+.card{background:var(--white);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:20px;}
+.card-title{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+
+/* FORMS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:560px){.form-row{grid-template-columns:1fr;}}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:.75rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.8px;}
+.form-group input,.form-group select{padding:11px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.95rem;background:#fafafa;}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--gold);background:#fff;}
+
+/* BOTONES */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:8px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;}
+.btn-primary{background:linear-gradient(135deg,var(--navy),var(--navy-light));color:#fff;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(10,31,92,0.25);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(201,162,39,0.3);}
+.btn-teal{background:linear-gradient(135deg,var(--teal),#0a9e93);color:#fff;}
+.btn-danger{background:#fee2e2;color:var(--danger);}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-sm{padding:6px 12px;font-size:.75rem;}
+.btn-purple{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;}
+
+/* ALERTAS */
+.alert{padding:11px 14px;border-radius:8px;font-size:.85rem;font-weight:600;margin:12px 0;}
+.alert-success{background:#f0fdf4;color:var(--success);border:1px solid #86efac;}
+.alert-error{background:#fef2f2;color:var(--danger);border:1px solid #fca5a5;}
+
+/* TABLA */
+.tbl{width:100%;border-collapse:collapse;font-size:.88rem;}
+.tbl th{text-align:left;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:8px 12px;border-bottom:2px solid #f3f4f6;}
+.tbl td{padding:11px 12px;border-bottom:1px solid #f3f4f6;vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#fafafa;}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy-light));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;}
+.avatar-kid{background:linear-gradient(135deg,#7c3aed,#a855f7);}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;}
+.pill-a{background:#dbeafe;color:#1e40af;}
+.pill-n{background:#f3e8ff;color:#6b21a8;}
+.pts{font-family:'Cinzel',serif;font-weight:900;font-size:1.05rem;color:var(--gold);}
+
+/* BONUS FORM */
+.bonus-wrap{background:#f8faff;border:2px dashed var(--navy-light);border-radius:12px;padding:20px;margin-bottom:16px;}
+.bonus-grid{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end;}
+@media(max-width:700px){.bonus-grid{grid-template-columns:1fr 1fr;}}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;}
+.stat{background:var(--white);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);text-align:center;border-top:4px solid var(--gold);}
+.stat-n{font-family:'Cinzel',serif;font-size:2rem;font-weight:900;color:var(--navy);}
+.stat-l{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;}
+
+.search{position:relative;margin-bottom:14px;}
+.search input{width:100%;padding:10px 16px 10px 38px;border:2px solid #e5e7eb;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.95rem;}
+.search input:focus{outline:none;border-color:var(--gold);}
+.search::before{content:'🔍';position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:.85rem;}
+.empty{text-align:center;color:var(--muted);padding:28px;font-size:.9rem;}
+
+/* HISTORIAL */
+.hist-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:.88rem;}
+.hist-item:last-child{border-bottom:none;}
+.hist-pts{font-weight:800;color:var(--success);}
+.hist-pts.neg{color:var(--danger);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-icon">⚙️</div>
+    <div class="login-title">Panel Admin</div>
+    <div class="login-sub">Iglesia Ebenezer · Acceso restringido</div>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="lu" placeholder="admin" autocomplete="off"/>
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <div style="position:relative;">
+        <input type="password" id="lp" placeholder="••••••••" style="padding-right:44px;"/>
+        <button id="toggle-pass" type="button" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2rem;color:rgba(255,255,255,0.6);padding:0;line-height:1;">👁</button>
+      </div>
+    </div>
+    <button class="btn-ingresar" id="btn-login">Ingresar</button>
+    <div class="login-err" id="lerr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="hbrand">⚙️ <span>EBENEZER</span> · Admin</div>
+    <button class="btn-out" id="btn-logout">Cerrar sesión</button>
+  </header>
+  <main>
+
+    <!-- STATS -->
+    <div class="stats" id="stats"></div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" data-panel="registrar">➕ Registrar</button>
+      <button class="tab" data-panel="bonos">🎁 Bonos</button>
+      <button class="tab" data-panel="adultos">👥 Adultos</button>
+      <button class="tab" data-panel="ninos">🌟 Niños</button>
+      <button class="tab" data-panel="historial">📋 Historial</button>
+    </div>
+
+    <!-- REGISTRAR -->
+    <div id="panel-registrar" class="panel active">
+      <div class="card">
+        <div class="card-title">➕ Registrar nuevo miembro</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" id="new-name" placeholder="ej. Ana García"/>
+          </div>
+          <div class="form-group">
+            <label>Categoría</label>
+            <select id="new-cat">
+              <option value="adultos">👥 Adultos</option>
+              <option value="ninos">🌟 Niños</option>
+            </select>
+          </div>
+        </div>
+        <div id="alert-reg"></div>
+        <button class="btn btn-primary" id="btn-reg">✦ Registrar miembro</button>
+      </div>
+    </div>
+
+    <!-- BONOS -->
+    <div id="panel-bonos" class="panel">
+      <div class="card">
+        <div class="card-title">🎁 Asignar bonos</div>
+        <div class="bonus-wrap">
+          <div class="bonus-grid">
+            <div class="form-group"><label>Miembro</label><select id="bsel"></select></div>
+            <div class="form-group"><label>Tipo</label>
+              <select id="btipo">
+                <option value="puntualidad">⏰ Puntualidad</option>
+                <option value="asistencia">✅ Asistencia</option>
+                <option value="especial">⭐ Especial</option>
+                <option value="canje">🎁 Canje (−)</option>
+              </select>
+            </div>
+<div class="form-group"><label>Puntos</label>
+              <input type="number" id="bpts" value="1" min="1" max="99"/>
+            </div>
+            <button class="btn btn-gold" id="btn-bonus">Sumar</button>
+          </div>
+          <div class="form-group" style="margin-top:12px">
+            <label>Nota / razón</label>
+            <input type="text" id="bnota" placeholder="ej. Clase del 8 de junio"/>
+          </div>
+        </div>
+        <div id="alert-bonus"></div>
+      </div>
+    </div>
+
+    <!-- ADULTOS -->
+    <div id="panel-adultos" class="panel">
+      <div class="card">
+        <div class="card-title">👥 Miembros Adultos</div>
+        <div class="search"><input type="text" id="sa" placeholder="Buscar adulto..."/></div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Nombre</th><th>⏰ Puntualidad</th><th>✅ Asistencia</th><th>⭐ Especial</th><th>Total</th><th>Acc.</th></tr></thead>
+            <tbody id="tabla-adultos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NIÑOS -->
+    <div id="panel-ninos" class="panel">
+      <div class="card">
+        <div class="card-title">🌟 Miembros Niños</div>
+        <div class="search"><input type="text" id="sn" placeholder="Buscar niño..."/></div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Nombre</th><th>⏰ Puntualidad</th><th>✅ Asistencia</th><th>⭐ Especial</th><th>Total</th><th>Acc.</th></tr></thead>
+            <tbody id="tabla-ninos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div id="panel-historial" class="panel">
+      <div class="card">
+        <div class="card-title">📋 Historial de movimientos</div>
+        <div class="search"><input type="text" id="sh" placeholder="Buscar en historial..."/></div>
+        <div id="lista-hist"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal editar puntos -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:var(--radius);padding:28px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="font-family:'Cinzel',serif;font-weight:700;color:var(--navy);font-size:1rem;margin-bottom:18px;">✏️ Editar puntos de <span id="modal-name"></span></div>
+    <div class="form-row">
+      <div class="form-group"><label>⏰ Puntualidad</label><input type="number" id="epu" min="0"/></div>
+      <div class="form-group"><label>✅ Asistencia</label><input type="number" id="eas" min="0"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>⭐ Especial</label><input type="number" id="ees" min="0"/></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-gold" id="btn-save-edit">Guardar</button>
+      <button class="btn btn-primary" id="btn-cancel-modal">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getDatabase, ref, set, get, push, onValue, remove, update }
+                           from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBw8daccEJMVPl-FwUkV24uK0APir0Ncac",
+  authDomain: "ebnos-5ed82.firebaseapp.com",
+  databaseURL: "https://ebnos-5ed82-default-rtdb.firebaseio.com",
+  projectId: "ebnos-5ed82",
+  storageBucket: "ebnos-5ed82.firebasestorage.app",
+  messagingSenderId: "671600108906",
+  appId: "1:671600108906:web:bc03a13ddbc29eda023113"
+};
+
+const db = getDatabase(initializeApp(firebaseConfig));
+const ADMIN = { user:"pastora", pass:"ebenezer2026" };
+
+let allUsers = {}, allHistory = {}, editId = null;
+const $ = id => document.getElementById(id);
+
+// ── HELPERS ──────────────────────────────────────────────────
+function alert_(id, msg, type){
+  const el=$(id);
+  el.innerHTML=`<div class="alert alert-${type==='ok'?'success':'error'}">${msg}</div>`;
+  setTimeout(()=>el.innerHTML="",4000);
+}
+function fmtDate(ts){ return new Date(ts).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"2-digit",hour:"2-digit",minute:"2-digit"}); }
+function typeLabel(t){ return {puntualidad:"⏰ Puntualidad",asistencia:"✅ Asistencia",especial:"⭐ Especial",canje:"🎁 Canje"}[t]||t; }
+
+// ── LOGIN ────────────────────────────────────────────────────
+function doLogin(){
+  const u=$('lu').value.trim().toLowerCase();
+  const p=$('lp').value;
+  $('lerr').textContent="";
+  if(u===ADMIN.user && p===ADMIN.pass){
+    $('login-screen').style.display='none';
+    $('app').style.display='flex';
+    listenData();
+  } else {
+    $('lerr').textContent="Usuario o contraseña incorrectos.";
+  }
+}
+$('btn-login').addEventListener('click', doLogin);
+$('lp').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+$('toggle-pass').addEventListener('click',()=>{
+  const inp=$('lp');
+  const btn=$('toggle-pass');
+  if(inp.type==='password'){ inp.type='text'; btn.textContent='🙈'; }
+  else { inp.type='password'; btn.textContent='👁'; }
+});
+$('lu').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+$('btn-logout').addEventListener('click',()=>{
+  $('app').style.display='none';
+  $('login-screen').style.display='flex';
+  $('lu').value=''; $('lp').value='';
+});
+
+// ── DATA ─────────────────────────────────────────────────────
+function listenData(){
+  onValue(ref(db,'users'),  snap=>{ allUsers=snap.val()||{};    renderAll(); });
+  onValue(ref(db,'history'),snap=>{ allHistory=snap.val()||{};  renderHistorial(); });
+}
+
+function renderAll(){
+  renderStats();
+  renderTabla('adultos');
+  renderTabla('ninos');
+  renderBonusSel();
+}
+
+// ── STATS ────────────────────────────────────────────────────
+function renderStats(){
+  const u=Object.values(allUsers);
+  $('stats').innerHTML=[
+    [u.length,'Total Miembros'],
+    [u.filter(x=>x.category==='adultos').length,'Adultos'],
+    [u.filter(x=>x.category==='ninos').length,'Niños'],
+    [u.reduce((s,x)=>s+(x.puntualidad||0)+(x.asistencia||0)+(x.especial||0),0),'Bonos entregados'],
+    [Object.keys(allHistory).length,'Movimientos']
+  ].map(([n,l])=>`<div class="stat"><div class="stat-n">${n}</div><div class="stat-l">${l}</div></div>`).join('');
+}
+
+// ── TABLAS ───────────────────────────────────────────────────
+function renderTabla(cat){
+  const q=($('s'+cat[0])?.value||'').toLowerCase();
+  const tbody=$('tabla-'+cat);
+  const rows=Object.entries(allUsers)
+    .filter(([,u])=>u.category===cat && u.name.toLowerCase().includes(q))
+    .sort((a,b)=>((b[1].puntualidad||0)+(b[1].asistencia||0)+(b[1].especial||0))-((a[1].puntualidad||0)+(a[1].asistencia||0)+(a[1].especial||0)));
+  if(!rows.length){ tbody.innerHTML=`<tr><td colspan="6" class="empty">Sin miembros.</td></tr>`; return; }
+  const cls = cat==='ninos'?'avatar-kid':'';
+  tbody.innerHTML=rows.map(([id,u])=>{
+    const pu=u.puntualidad||0, as=u.asistencia||0, es=u.especial||0;
+    const tot=pu+as+es;
+    return `<tr>
+      <td style="display:flex;align-items:center;gap:10px">
+        <div class="avatar ${cls}">${u.name.charAt(0).toUpperCase()}</div>
+        <span style="font-weight:700">${u.name}</span>
+      </td>
+      <td class="pts">${pu}</td>
+      <td class="pts">${as}</td>
+      <td class="pts">${es}</td>
+      <td class="pts" style="color:var(--navy)">${tot}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-gold" data-edit="${id}">✏️</button>
+        <button class="btn btn-sm btn-danger" data-del="${id}">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+$('sa').addEventListener('input',()=>renderTabla('adultos'));
+$('sn').addEventListener('input',()=>renderTabla('ninos'));
+
+// Delegación clicks tabla
+['adultos','ninos'].forEach(cat=>{
+  $('tabla-'+cat).addEventListener('click', async e=>{
+    const edit=e.target.closest('[data-edit]');
+    const del=e.target.closest('[data-del]');
+    if(edit){
+      editId=edit.dataset.edit;
+      const u=allUsers[editId];
+      $('modal-name').textContent=u.name;
+      $('epu').value=u.puntualidad||0;
+      $('eas').value=u.asistencia||0;
+      $('ees').value=u.especial||0;
+      $('modal').style.display='flex';
+    }
+    if(del){
+      if(!confirm('¿Eliminar a '+allUsers[del.dataset.del]?.name+'?')) return;
+      await remove(ref(db,`users/${del.dataset.del}`));
+    }
+  });
+});
+
+// ── MODAL EDITAR ─────────────────────────────────────────────
+$('btn-save-edit').addEventListener('click', async()=>{
+  if(!editId)return;
+  const pu=parseInt($('epu').value)||0;
+  const as=parseInt($('eas').value)||0;
+  const es=parseInt($('ees').value)||0;
+  await update(ref(db,`users/${editId}`),{puntualidad:pu,asistencia:as,especial:es});
+  $('modal').style.display='none'; editId=null;
+});
+$('btn-cancel-modal').addEventListener('click',()=>{ $('modal').style.display='none'; editId=null; });
+$('modal').addEventListener('click', e=>{ if(e.target===$('modal')){ $('modal').style.display='none'; editId=null; }});
+
+// ── REGISTRAR ────────────────────────────────────────────────
+$('btn-reg').addEventListener('click', async()=>{
+  const name=$('new-name').value.trim();
+  const cat=$('new-cat').value;
+  if(!name){ alert_('alert-reg','Escribe el nombre del miembro.','err'); return; }
+  const dup=Object.values(allUsers).some(u=>u.name.toLowerCase()===name.toLowerCase()&&u.category===cat);
+  if(dup){ alert_('alert-reg','Ya existe un miembro con ese nombre en esta categoría.','err'); return; }
+  try{
+    await set(push(ref(db,'users')),{name,category:cat,t1:0,t2:0,createdAt:Date.now()});
+    alert_('alert-reg',`✅ "${name}" registrado correctamente.`,'ok');
+    $('new-name').value='';
+  } catch(e){ alert_('alert-reg','Error: '+e.message,'err'); }
+});
+
+// ── BONUS SEL ────────────────────────────────────────────────
+function renderBonusSel(){
+  const sel=$('bsel'); if(!sel)return;
+  const prev=sel.value;
+  sel.innerHTML=Object.entries(allUsers)
+    .sort((a,b)=>a[1].name.localeCompare(b[1].name))
+    .map(([id,u])=>`<option value="${id}">${u.name} (${u.category==='ninos'?'🌟 Niños':'👥 Adultos'})</option>`)
+    .join('');
+  if(prev) sel.value=prev;
+}
+
+// ── ASIGNAR BONUS ────────────────────────────────────────────
+$('btn-bonus').addEventListener('click', async()=>{
+  const uid=$('bsel').value;
+  const tipo=$('btipo').value;
+  const pts=parseInt($('bpts').value)||1;
+  const nota=$('bnota').value.trim();
+  if(!uid){ alert_('alert-bonus','Selecciona un miembro.','err'); return; }
+  const u=allUsers[uid];
+  const real=tipo==='canje'?-pts:pts;
+  const updates={};
+  if(tipo==='canje'){
+    // restar del total (puntualidad primero)
+    const pu=u.puntualidad||0, as=u.asistencia||0, es=u.especial||0;
+    const tot=Math.max(0, pu+as+es+real);
+    // guardamos como ajuste en especial para no complicar
+    updates[`users/${uid}/especial`]=Math.max(0,(u.especial||0)+real);
+  } else {
+    updates[`users/${uid}/${tipo}`]=Math.max(0,(u[tipo]||0)+real);
+  }
+  const hk=push(ref(db,'history')).key;
+  updates[`history/${hk}`]={userId:uid,userName:u.name,tipo,pts:real,nota,ts:Date.now()};
+  try{
+    await update(ref(db),updates);
+    alert_('alert-bonus',`✅ ${real>0?'+':''}${real} pts de ${tipo} a ${u.name}.`,'ok');
+    $('bpts').value='1'; $('bnota').value='';
+  } catch(e){ alert_('alert-bonus','Error: '+e.message,'err'); }
+});
+
+// ── HISTORIAL ────────────────────────────────────────────────
+function renderHistorial(){
+  const q=($('sh')?.value||'').toLowerCase();
+  const el=$('lista-hist');
+  const moves=Object.values(allHistory)
+    .filter(h=>h.userName?.toLowerCase().includes(q)||h.nota?.toLowerCase().includes(q))
+    .sort((a,b)=>b.ts-a.ts);
+  if(!moves.length){ el.innerHTML='<div class="empty">Sin movimientos.</div>'; return; }
+  el.innerHTML=moves.slice(0,60).map(h=>`
+    <div class="hist-item">
+      <div>
+        <div style="font-weight:700">${h.userName} · ${typeLabel(h.tipo)}</div>
+        <div style="font-size:.76rem;color:var(--muted)">${fmtDate(h.ts)}${h.nota?' · '+h.nota:''}</div>
+      </div>
+      <div class="hist-pts ${h.pts<0?'neg':''}">${h.pts>0?'+':''}${h.pts} pts</div>
+    </div>`).join('');
+}
+$('sh').addEventListener('input', renderHistorial);
+
+// ── TABS ─────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    $('panel-'+tab.dataset.panel).classList.add('active');
+    if(tab.dataset.panel==='bonos') renderBonusSel();
+  });
+});
+</script>
+</body>
+</html>
